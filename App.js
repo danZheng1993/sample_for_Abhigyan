@@ -6,109 +6,90 @@
  * @flow
  */
 
-import React, {Fragment} from 'react';
+import React, { useState } from "react";
 import {
   SafeAreaView,
-  StyleSheet,
-  ScrollView,
+  FlatList,
   View,
   Text,
-  StatusBar,
-} from 'react-native';
+  TouchableOpacity
+} from "react-native";
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import data from "./data.json";
 
 const App = () => {
+  const [state, setState] = useState({ price: 0, checked: [] });
+  const { price, checked } = state;
+  console.log(state);
   return (
-    <Fragment>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Fragment>
+    <SafeAreaView>
+      <Text>Price: ${price}</Text>
+      <FlatList
+        data={data}
+        keyExtractor={val => `invoice_${val.id}`}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.wrapper}
+            onPress={() => {
+              console.log(state);
+              if (checked.findIndex(id => item.id === id) >= 0) {
+                setState({
+                  price: price - parseInt(item.price),
+                  checked: checked.filter(id => id !== item.id),
+                });
+              } else {
+                setState({
+                  price: price + parseInt(item.price),
+                  checked: [...checked, item.id],
+                });
+              }
+            }}
+          >
+            <View
+              style={
+                checked.findIndex(id => item.id === id) >= 0
+                  ? styles.checked
+                  : styles.unchecked
+              }
+            />
+            <Text style={styles.text}>{item.name}</Text>
+            <Text style={styles.value}>{item.price}</Text>
+          </TouchableOpacity>
+        )}
+        extraData={checked}
+      />
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+const styles = {
+  wrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingVertical: 16
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  checked: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: "#ECECEC",
+    backgroundColor: "#CCC",
+    marginHorizontal: 10,
   },
-  body: {
-    backgroundColor: Colors.white,
+  unchecked: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: "#ECECEC",
+    backgroundColor: "#FFF",
+    marginHorizontal: 10,
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  text: {
+    flex: 1
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+};
 
 export default App;
